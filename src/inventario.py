@@ -1,4 +1,19 @@
-# inventario.py - Gestión de Inventario (CRUD + Filtros + Reportes)
+import logging
+import sentry_sdk
+
+# Configuración de logging
+logging.basicConfig(
+    filename='inventario.log',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+# Configuración de Sentry
+sentry_sdk.init(
+    dsn="https://08baec56f56b7cf283a21774d49924d5@o4509075969474560.ingest.us.sentry.io/4509099307565056",  
+    traces_sample_rate=1.0,  # Opcional: monitorea performance
+    environment="production",  # Opcional: define el entorno (dev, testing, etc.)
+)
+
 productos = []  # Lista para almacenar los productos
 
 # Función para agregar un producto
