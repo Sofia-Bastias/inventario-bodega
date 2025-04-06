@@ -3,22 +3,39 @@ productos = []  # Lista para almacenar los productos
 
 # Función para agregar un producto
 def agregar_producto():
-    print("\n--- AGREGAR PRODUCTO ---")
-    nombre = input("Nombre del producto: ").strip()
-    descripcion = input("Descripción: ").strip()
-    cantidad = int(input("Cantidad disponible: "))
-    precio = float(input("Precio unitario: $"))
-    categoria = input("Categoría (Ej: Electrónica, Ropa): ").strip()
+    try:
+        print("\n--- AGREGAR PRODUCTO ---")
+        nombre = input("Nombre del producto: ").strip()
+        if not nombre:
+            raise ValueError("El nombre no puede estar vacío, intente nuevamente.")
+        
+        descripcion = input("Descripción: ").strip()
+        
+        # Validar cantidad y precio
+        cantidad = int(input("Cantidad disponible: "))
+        precio = float(input("Precio unitario: $"))
+        if cantidad < 0 or precio <= 0:
+            raise ValueError("Error: La cantidad debe ser mayor o igual a 0 y el precio mayor a 0.")
 
-    producto = {
-        "nombre": nombre,
-        "descripcion": descripcion,
-        "cantidad": cantidad,
-        "precio": precio,
-        "categoria": categoria
-    }
-    productos.append(producto)
-    print(f"✅ Producto '{nombre}' agregado al inventario.")
+        categoria = input("Categoría: ").strip()
+        
+        producto = {
+            "nombre": nombre,
+            "descripcion": descripcion,
+            "cantidad": cantidad,
+            "precio": precio,
+            "categoria": categoria
+        }
+        productos.append(producto)
+        print(f" Producto '{nombre}' agregado exitosamente.")
+
+    except ValueError as e:
+        print(f"\n {str(e)}")
+        logging.error(f"Error en agregar_producto: {str(e)}")
+    except Exception as e:
+        print("\n Error inesperado. Contacta al administrador.")
+        logging.critical(f"Error crítico en agregar_producto: {str(e)}")
+        sentry_sdk.capture_exception(e)  # Para Sentry
 
 # Función para mostrar todos los productos
 def mostrar_productos():
@@ -31,63 +48,110 @@ def mostrar_productos():
 
 # Función para actualizar un producto
 def actualizar_producto():
-    mostrar_productos()
-    if not productos:
-        return
-
     try:
+        if not productos:
+            print("No hay productos para actualizar.")
+            return
+
+        mostrar_productos()
         num = int(input("\nNúmero del producto a actualizar: ")) - 1
+        
+        if num < 0 or num >= len(productos):
+            raise IndexError("Número de producto inválido.")
+
         producto = productos[num]
         print(f"\nEditando: {producto['nombre']}")
-        producto['nombre'] = input(f"Nuevo nombre ({producto['nombre']}): ") or producto['nombre']
-        producto['descripcion'] = input(f"Nueva descripción ({producto['descripcion']}): ") or producto['descripcion']
-        producto['cantidad'] = int(input(f"Nueva cantidad ({producto['cantidad']}): ") or producto['cantidad'])
-        producto['precio'] = float(input(f"Nuevo precio (${producto['precio']}): $") or producto['precio'])
-        producto['categoria'] = input(f"Nueva categoría ({producto['categoria']}): ") or producto['categoria']
-        print("✅ Producto actualizado.")
-    except (ValueError, IndexError):
-        print("❌ Error: Número de producto inválido.")
+        
+        # Actualizar solo campos no vacíos
+        nuevo_nombre = input(f"Nuevo nombre ({producto['nombre']}): ").strip()
+        producto['nombre'] = nuevo_nombre if nuevo_nombre else producto['nombre']
+        
+        nueva_cant = input(f"Nueva cantidad ({producto['cantidad']}): ").strip()
+        producto['cantidad'] = int(nueva_cant) if nueva_cant else producto['cantidad']
+
+        print("Producto actualizado")
+
+    except ValueError:
+        print("Error: La cantidad debe ser un número entero.")
+    except IndexError:
+        print("Error: Número de producto no existe.")
+    except Exception as e:
+        print("Error inesperado")
+        logging.error(f"Error en actualizar_producto: {str(e)}")
 
 # Función para eliminar un producto
 def eliminar_producto():
-    mostrar_productos()
-    if not productos:
-        return
-
     try:
+        if not productos:
+            print("No hay productos para eliminar.")
+            return
+
+        mostrar_productos()
         num = int(input("\nNúmero del producto a eliminar: ")) - 1
+        
+        if num < 0 or num >= len(productos):
+            raise IndexError("Número de producto inválido")
+
         producto = productos.pop(num)
-        print(f"✅ Producto '{producto['nombre']}' eliminado.")
-    except (ValueError, IndexError):
-        print("❌ Error: Número de producto inválido.")
+        print(f"Producto '{producto['nombre']}' eliminado exitosamente.")
+
+    except ValueError:
+        print("Error: Debes ingresar un número")
+    except IndexError:
+        print("Error: Número de producto no existe")
+    except Exception as e:
+        print("Error inesperado")
+        logging.error(f"Error en eliminar_producto: {str(e)}")
+        if 'sentry_sdk' in globals():  # Para Sentry
+            sentry_sdk.capture_exception(e)
 
 # Función para buscar/filtrar productos
 def buscar_productos():
-    print("\n--- BUSCAR PRODUCTOS ---")
-    termino = input("Buscar por nombre o categoría: ").lower()
-    resultados = [
-        p for p in productos
-        if termino in p['nombre'].lower() or termino in p['categoria'].lower()
-    ]
-    
-    if not resultados:
-        print("No se encontraron productos.")
-    else:
-        for p in resultados:
-            print(f"{p['nombre']} - {p['categoria']} - Stock: {p['cantidad']}")
+    try:
+        if not productos:
+            print("No hay productos para buscar/filtrar.")
+            return
+
+        termino = input("Buscar por nombre o categoría: ").strip().lower()
+        if not termino:
+            raise ValueError("Término de búsqueda vacío.")
+
+        resultados = [
+            p for p in productos
+            if termino in p['nombre'].lower() or termino in p['categoria'].lower()
+        ]
+        
+        if not resultados:
+            print("No se encontraron productos.")
+        else:
+            for p in resultados:
+                print(f"{p['nombre']} - {p['categoria']} - Stock: {p['cantidad']}")
+
+    except ValueError as e:
+        print(f" {str(e)}")
+        logging.warning(f"Búsqueda fallida: {str(e)}")
 
 # Función para generar reportes
 def generar_reporte():
-    print("\n--- REPORTE DE INVENTARIO ---")
-    total_productos = len(productos)
-    valor_total = sum(p['precio'] * p['cantidad'] for p in productos)
-    productos_agotados = [p for p in productos if p['cantidad'] == 0]
+    try:
+        if not productos:
+            print("No hay productos para generar reporte.")
+            return
 
-    print(f"Total de productos: {total_productos}")
-    print(f"Valor total del inventario: ${valor_total:.2f}")
-    print("\nProductos agotados:")
-    for p in productos_agotados:
-        print(f"- {p['nombre']}")
+        total_productos = len(productos)
+        valor_total = sum(p['precio'] * p['cantidad'] for p in productos)
+        productos_agotados = [p for p in productos if p['cantidad'] == 0]
+
+        print("\n=== REPORTE ===")
+        print(f"Total de productos: {total_productos}")
+        print(f"Valor total del inventario: ${valor_total:.2f}")
+        print("\nProductos agotados:")
+        for p in productos_agotados:
+            print(f"- {p['nombre']}")
+
+    except Exception as e:
+        print("Error al generar reporte")
+        logging.error(f"Error en generar_reporte: {str(e)}")
 
 # Menú principal
 def menu():
@@ -118,7 +182,7 @@ def menu():
             print("Saliendo del sistema...")
             break
         else:
-            print("❌ Opción no válida. Intente nuevamente.")
+            print("Opción no válida. Intente nuevamente.")
 
 # Ejecutar el programa
 if __name__ == "__main__":
