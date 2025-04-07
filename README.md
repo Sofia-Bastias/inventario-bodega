@@ -1,5 +1,4 @@
 # Gestión de Inventario  
-**Integrantes**: Álvaro Sánchez y Sofía Bastías  
 ## Descripción  
 Aplicación Python para gestionar inventarios con:  
 - CRUD de productos.  
