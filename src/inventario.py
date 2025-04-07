@@ -2,6 +2,15 @@ import logging
 import sentry_sdk
 import os
 from dotenv import load_dotenv
+from database import inicializar_db
+from funciones import (
+    agregar_producto,
+    mostrar_productos,
+    actualizar_producto,
+    eliminar_producto,
+    buscar_productos,
+    generar_reporte
+)
 
 # Configuración de logging
 logging.basicConfig(
@@ -23,6 +32,7 @@ sentry_sdk.init(
 productos = []  # Lista para almacenar los productos
 
 # Función para agregar un producto
+'''
 def agregar_producto():
     try:
         print("\n--- AGREGAR PRODUCTO ---")
@@ -57,8 +67,10 @@ def agregar_producto():
         print("\n Error inesperado. Contacta al administrador.")
         logging.critical(f"Error crítico en agregar_producto: {str(e)}")
         sentry_sdk.capture_exception(e)  # Para Sentry
+        '''
 
-# Función para mostrar todos los productos
+# Función para mostrar todos los productos    
+'''
 def mostrar_productos():
     print("\n--- LISTA DE PRODUCTOS ---")
     if not productos:
@@ -66,8 +78,10 @@ def mostrar_productos():
     else:
         for idx, producto in enumerate(productos, 1):
             print(f"{idx}. {producto['nombre']} - {producto['cantidad']} unidades (${producto['precio']}) - Categoría: {producto['categoria']}")
+'''
 
 # Función para actualizar un producto
+'''
 def actualizar_producto():
     try:
         if not productos:
@@ -99,8 +113,10 @@ def actualizar_producto():
     except Exception as e:
         print("Error inesperado")
         logging.error(f"Error en actualizar_producto: {str(e)}")
+'''
 
 # Función para eliminar un producto
+'''
 def eliminar_producto():
     try:
         if not productos:
@@ -125,8 +141,9 @@ def eliminar_producto():
         logging.error(f"Error en eliminar_producto: {str(e)}")
         if 'sentry_sdk' in globals():  # Para Sentry
             sentry_sdk.capture_exception(e)
-
+'''
 # Función para buscar/filtrar productos
+'''
 def buscar_productos():
     try:
         if not productos:
@@ -151,8 +168,10 @@ def buscar_productos():
     except ValueError as e:
         print(f" {str(e)}")
         logging.warning(f"Búsqueda fallida: {str(e)}")
+'''
 
 # Función para generar reportes
+'''
 def generar_reporte():
     try:
         if not productos:
@@ -173,6 +192,7 @@ def generar_reporte():
     except Exception as e:
         print("Error al generar reporte")
         logging.error(f"Error en generar_reporte: {str(e)}")
+'''
 
 # Menú principal
 def menu():
@@ -207,4 +227,6 @@ def menu():
 
 # Ejecutar el programa
 if __name__ == "__main__":
-    menu()
+    inicializar_db()  # Esto crea la base de datos si no existe
+    menu()            # Luego muestra el menú
+
