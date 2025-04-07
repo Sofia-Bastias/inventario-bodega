@@ -9,7 +9,7 @@ logging.basicConfig(
 )
 # Configuración de Sentry
 sentry_sdk.init(
-    dsn="https://08baec56f56b7cf283a21774d49924d5@o4509075969474560.ingest.us.sentry.io/4509099307565056",  
+    dsn="https://[TU_DSN_AQUI]@sentry.io/[ID]",  
     traces_sample_rate=1.0,  # Opcional: monitorea performance
     environment="production",  # Opcional: define el entorno (dev, testing, etc.)
 )
