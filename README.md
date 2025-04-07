@@ -1,10 +1,27 @@
 # Gestión de Inventario  
 **Integrantes**: Álvaro Sánchez y Sofía Bastías  
-## Requerimientos completados  
+## Descripción  
+Aplicación Python para gestionar inventarios con:  
 - CRUD de productos.  
-- Filtrado por categoría (asumido).  
-- Reportes en consola.  
+- Filtrado por categoría/nombre.  
+- Reportes de stock y valor total.  
+- Registro de errores en logs locales y/o Sentry.io.  
 
+## Instalación  
+1. Clonar el repositorio:  
+   ```bash
+   git clone https://github.com/tu-usuario/inventario-bodega.git   
+
+2. Instalar dependencias:   
+   ```bash
+   pip install sentry-sdk python-dotenv   
+## Cómo usar
+1. Ejecutar programa:
+   ```bash
+   python inventario.py
+
+2. Escoger opciones disponibles en menú.
+   
 ## Flujo de Trabajo (GitHub Flow)  
 Elegimos **GitHub Flow** por:  
 - **Simplicidad**: Solo usamos la rama `main` con protección activada.  
@@ -81,7 +98,7 @@ El sistema controla los siguientes errores:
     print("Error inesperado. Contacta al administrador.")
     logging.critical(f"Error crítico en agregar_producto: {str(e)}")
    ```
-## 📝 Registro y Monitoreo de Errores
+## Registro y Monitoreo de Errores
 
 ### 1. Configuración de Logs Locales
 El sistema registra eventos en el archivo `inventario.log` con el siguiente formato:
@@ -120,3 +137,13 @@ Características:
 - Reporta errores en tiempo real al panel de Sentry
 - Almacena stack traces completos
 - Clasifica errores por frecuencia y severidad
+
+## Cómo contribuir (recomendaciones que conocemos)
+
+1. Hacer fork del proyecto (necesario para un externo que quiera contribuir, no lo usamos nosotros).
+2. Crear una nueva rama: `git checkout -b nueva-funcion`
+3. Hacer commit: `git commit -m "Agrega X/Se cambia X"`
+4. Hacer push y abrir un pull request.
+
+## Licencia   
+[MIT](https://choosealicense.com/licenses/mit/)
