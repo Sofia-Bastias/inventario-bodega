@@ -81,3 +81,42 @@ El sistema controla los siguientes errores:
     print("Error inesperado. Contacta al administrador.")
     logging.critical(f"Error crítico en agregar_producto: {str(e)}")
    ```
+## 📝 Registro y Monitoreo de Errores
+
+### 1. Configuración de Logs Locales
+El sistema registra eventos en el archivo `inventario.log` con el siguiente formato:
+```python
+import logging
+
+logging.basicConfig(
+    filename='inventario.log',
+    level=logging.DEBUG,  # Captura desde mensajes DEBUG hasta CRITICAL
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+```
+
+Niveles de registro utilizados:
+
+`DEBUG`: Información detallada para desarrollo   
+`INFO`: Eventos normales del sistema   
+`WARNING`: Situaciones anómalas recuperables   
+`ERROR`: Fallos importantes   
+`CRITICAL`: Errores críticos que impiden el funcionamiento   
+
+### 2. Integración con Sentry.io
+Configuración para monitoreo remoto de errores:   
+
+```python
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://[TU-DSN].ingest.sentry.io/[PROJECT-ID]",
+    traces_sample_rate=1.0,
+    environment="production"
+)
+```
+Características:
+
+- Reporta errores en tiempo real al panel de Sentry
+- Almacena stack traces completos
+- Clasifica errores por frecuencia y severidad
