@@ -1,5 +1,7 @@
 import logging
 import sentry_sdk
+import os
+from dotenv import load_dotenv
 
 # Configuración de logging
 logging.basicConfig(
@@ -7,11 +9,15 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+# Cargar variables del archivo .env
+load_dotenv()
+
 # Configuración de Sentry
 sentry_sdk.init(
-    dsn="https://[TU_DSN_AQUI]@sentry.io/[ID]",  
-    traces_sample_rate=1.0,  # Opcional: monitorea performance
-    environment="production",  # Opcional: define el entorno (dev, testing, etc.)
+    dsn=os.getenv("SENTRY_DSN"),  # Lee del archivo .env
+    traces_sample_rate=1.0,
+    environment=os.getenv("ENVIRONMENT", "production")  # Valor por defecto si no existe
 )
 
 productos = []  # Lista para almacenar los productos
