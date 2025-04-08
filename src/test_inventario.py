@@ -86,7 +86,6 @@ class TestProductos(unittest.TestCase):
         self.assertIsNotNone(producto)
         self.assertEqual(producto, ("Producto B", "Producto de prueba", 15, 99.99, "Pruebas"))
     
-    
     @patch('builtins.input', side_effect=[
         "TestProducto",         # nombre
         "Producto de prueba",   # descripcion
