@@ -4,7 +4,8 @@ Aplicación Python para gestionar inventarios con:
 - CRUD de productos.  
 - Filtrado por categoría/nombre.  
 - Reportes de stock y valor total.  
-- Registro de errores en logs locales y/o Sentry.io.  
+- Registro de errores en logs locales y/o Sentry.io. 
+- Base de datos local. 
 
 ## Instalación  
 1. Clonar el repositorio:  
@@ -13,13 +14,13 @@ Aplicación Python para gestionar inventarios con:
 
 2. Instalar dependencias:   
    ```bash
-   pip install sentry-sdk python-dotenv   
+   pip install sentry-sdk 
 ## Cómo usar
 1. Ejecutar programa:
    ```bash
    python inventario.py
 
-2. Escoger opciones disponibles en menú.
+2. Utilizar el menú para gestionar productos (agregar, actualizar, eliminar, buscar, reportar).
    
 ## Flujo de Trabajo (GitHub Flow)  
 Elegimos **GitHub Flow** por:  
@@ -47,10 +48,12 @@ El sistema controla los siguientes errores:
 | Función              | Errores manejados                           |  
 |----------------------|--------------------------------------------|  
 | `agregar_producto`   | Nombre vacío, cantidad/precio inválidos    |  
-| `actualizar_producto`| Número de producto inválido, valores negativos |  
-| `eliminar_producto`  | Índice incorrecto, entrada no numérica     |  
+| `actualizar_producto`| Número de producto inválido, valores negativos, entradas |  
+| `eliminar_producto`  | Índice incorrecto o inexistente, entrada no numérica |  
 | `buscar_productos`   | Término de búsqueda vacío                  |  
 | `generar_reporte`    | Inventario vacío                           |  
+
+Errores inesperados se capturan con Exception y se notifican mediante logs.
 
 ### 1. Validación de Entradas
 - **Campos obligatorios vacíos**:  
@@ -68,7 +71,7 @@ El sistema controla los siguientes errores:
      Mensaje al usuario (en actualizar_producto):
    ```python
    except ValueError:
-        print("Error: La cantidad debe ser un número entero.")
+        print("❌ Error: La cantidad debe ser un número entero.")
    ```
    Si la cantidad es negativa o el precio ≤ 0:
    ```python
@@ -80,8 +83,11 @@ El sistema controla los siguientes errores:
 
   Al intentar actualizar/eliminar un producto que no existe:
    ```python
-   if num < 0 or num >= len(productos):
-    raise IndexError("Número de producto inválido.") #Mensaje al usuario
+   if not producto:
+      raise IndexError("El producto no existe o ya fue eliminado.")
+
+   except IndexError:
+      print("❌ Error: Número de producto no existe.")
    ```
 - **Búsquedas vacías**:
 
