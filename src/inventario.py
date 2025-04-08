@@ -24,12 +24,13 @@ load_dotenv()
 
 # Configuración de Sentry
 sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),  # Lee del archivo .env
+    dsn="https://e08040f90b546ee2a41ca67c6a0fc500@o4509113964101632.ingest.us.sentry.io/4509113970720768",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
     traces_sample_rate=1.0,
-    environment=os.getenv("ENVIRONMENT", "production")  # Valor por defecto si no existe
+    environment="production"
 )
-
-productos = []  # Lista para almacenar los productos
 
 # Función para agregar un producto
 '''

@@ -1,6 +1,5 @@
 # funciones.py
 # Aqui estan todas las funciones que se encargan de la logica del programa
-import sqlite3
 from database import conectar
 import logging
 import sentry_sdk
@@ -12,10 +11,14 @@ def agregar_producto():
         print("\n--- AGREGAR PRODUCTO ---")
         nombre = input("Nombre del producto: ").strip()
         if not nombre:
-            raise ValueError("El nombre no puede estar vacío.")
+            raise ValueError("El nombre no puede estar vacío, intente nuevamente.")
         descripcion = input("Descripción: ").strip()
-        cantidad = int(input("Cantidad: "))
-        precio = float(input("Precio: "))
+        # Validar cantidad y precio
+        cantidad = int(input("Cantidad disponible: "))
+        precio = float(input("Precio unitario: $"))
+        if cantidad < 0 or precio <= 0:
+            raise ValueError("Error: La cantidad debe ser mayor o igual a 0 y el precio mayor a 0.")
+        
         categoria = input("Categoría: ").strip()
 
         conn = conectar()
@@ -27,8 +30,11 @@ def agregar_producto():
         conn.commit()
         conn.close()
 
-        print(f"✅ Producto '{nombre}' agregado.")
+        print(f"✅ Producto '{nombre}' agregado exitosamente.")
 
+    except ValueError as e:
+        print(f"\n {str(e)}")
+        logging.error(f"Error en agregar_producto: {str(e)}")
     except Exception as e:
         print("❌ Error al agregar producto.")
         logging.error(f"Error en agregar_producto: {str(e)}")
@@ -45,19 +51,22 @@ def mostrar_productos():
 
         if not filas:
             print("No hay productos registrados.")
-            return
+            return False
 
         print("\n--- LISTA DE PRODUCTOS ---")
         for fila in filas:
             print(f"{fila[0]}. {fila[1]} - {fila[2]} unidades - ${fila[3]} - {fila[4]}")
-    
+        return True
     except Exception as e:
         print("❌ Error al mostrar productos:", str(e))
         
 # Función para actualizar un producto
 def actualizar_producto():
+    hay_productos = mostrar_productos()
+    if not hay_productos:
+        print("No hay productos para actualizar.")
+        return
     try:
-        mostrar_productos()
         producto_id = int(input("\nID del producto a actualizar: "))
 
         conn = conectar()
@@ -65,13 +74,9 @@ def actualizar_producto():
         cursor.execute("SELECT * FROM productos WHERE id = ?", (producto_id,))
         producto = cursor.fetchone()
 
-        if not producto:
-            print("Producto no encontrado.")
-            return
-
         print(f"\nEditando: {producto[1]}")
         nuevo_nombre = input(f"Nuevo nombre ({producto[1]}): ").strip()
-        nueva_cantidad = input(f"Nueva cantidad ({producto[3]}): ").strip()
+        nueva_cantidad = int(input(f"Nueva cantidad ({producto[3]}): ").strip())
 
         cursor.execute("""
             UPDATE productos SET nombre = ?, cantidad = ? WHERE id = ?
@@ -89,24 +94,34 @@ def actualizar_producto():
     except IndexError:
         print("❌ Error: Número de producto no existe.")
     except Exception as e:
-        print("❌ Error al actualizar producto:", str(e))
+        print("❌ Error inesperado")
         logging.error(f"Error en actualizar_producto: {str(e)}")
         
 # Función para eliminar un producto
 def eliminar_producto():
+    hay_productos = mostrar_productos()
+    if not hay_productos:
+        print("No hay productos para eliminar.")
+        return
     try:
-        mostrar_productos()
         producto_id = int(input("\nID del producto a eliminar: "))
 
         conn = conectar()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM productos WHERE id = ?", (producto_id,))
+        cursor.execute("SELECT * FROM productos WHERE id = ?", (producto_id,))        
+        producto = cursor.fetchone()
+        # Verificamos si el producto esta
+        if not producto:
+            raise ValueError("El producto no existe o ya fue eliminado.")
+        else:
+            cursor.execute("DELETE FROM productos WHERE id = ?", (producto_id,))
+            print("✅ Producto eliminado exitosamente.")
+        # Commit y cerrar conexión
         conn.commit()
         conn.close()
 
-        print("✅ Producto eliminado exitosamente.")
     except ValueError:
-        print("❌ Error: Debes ingresar un número.")
+        print("❌ Error: Debes ingresar un número valido.")
     except IndexError:
         print("❌ Error: Número de producto no existe.")
     except Exception as e:
@@ -117,6 +132,10 @@ def eliminar_producto():
         
 # Función para buscar/filtrar productos
 def buscar_productos():
+    hay_productos = mostrar_productos()
+    if not hay_productos:
+        print("No hay productos para buscar/filtrar.")
+        return
     try:
         termino = input("Buscar por nombre o categoría: ").strip().lower()
 
