@@ -119,7 +119,7 @@ class TestProductos(unittest.TestCase):
         "10",                   # cantidad
         "99.99",                # precio
         "Pruebas",              # categoria
-        "4"                    # id
+        "4"                     # id
     ])
     def test_eliminar_producto(self, mock_input):
         # Primero agregar un producto

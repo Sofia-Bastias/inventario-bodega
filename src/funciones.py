@@ -16,7 +16,9 @@ def agregar_producto():
         # Validar cantidad y precio
         cantidad = int(input("Cantidad disponible: "))
         precio = float(input("Precio unitario: $"))
-        if cantidad < 0 or precio <= 0:
+        if (cantidad or precio) == None:
+            raise ValueError("Error: Entrada vacia, intente nuevamente.")
+        elif cantidad < 0 or precio <= 0:
             raise ValueError("Error: La cantidad debe ser mayor o igual a 0 y el precio mayor a 0.")
         
         categoria = input("Categoría: ").strip()
@@ -33,7 +35,7 @@ def agregar_producto():
         print(f"✅ Producto '{nombre}' agregado exitosamente.")
 
     except ValueError as e:
-        print(f"\n {str(e)}")
+        print(f"Error: Entrada invalida, intente nuevamente.")
         logging.error(f"Error en agregar_producto: {str(e)}")
     except Exception as e:
         print("❌ Error al agregar producto.")
@@ -68,12 +70,13 @@ def actualizar_producto():
         return
     try:
         producto_id = int(input("\nID del producto a actualizar: "))
-
         conn = conectar()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM productos WHERE id = ?", (producto_id,))
         producto = cursor.fetchone()
-
+        # Verificamos si el producto esta
+        if not producto:
+            raise IndexError("El producto no existe o ya fue eliminado.")
         print(f"\nEditando: {producto[1]}")
         nuevo_nombre = input(f"Nuevo nombre ({producto[1]}): ").strip()
         nueva_cantidad = int(input(f"Nueva cantidad ({producto[3]}): ").strip())
@@ -138,7 +141,9 @@ def buscar_productos():
         return
     try:
         termino = input("Buscar por nombre o categoría: ").strip().lower()
-
+        if not termino:
+            raise ValueError("Término de búsqueda vacío.")
+            
         conn = conectar()
         cursor = conn.cursor()
         cursor.execute("""
@@ -176,9 +181,12 @@ def generar_reporte():
         print("\n=== REPORTE ===")
         print(f"Total de productos: {total}")
         print(f"Valor total del inventario: ${valor_total:.2f}")
-        print("Productos agotados:")
-        for nombre in agotados:
-            print(f"- {nombre[0]}")
+        if not agotados:
+            print("No hay productos agotados.")
+        else:
+            print("Productos agotados:")
+            for nombre in agotados:
+                print(f"- {nombre[0]}")
 
     except Exception as e:
         print("Error al generar reporte")
